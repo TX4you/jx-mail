@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  stalwart-mail:
+    image: stalwartlabs/stalwart:latest
+    container_name: jx-mail-server
+    restart: unless-stopped
+    ports:
+      - "25:25"     # SMTP (External Mail Receipt)
+      - "465:465"   # SMTPS (Implicit TLS)
+      - "587:587"   # Submission (STARTTLS)
+      - "143:143"   # IMAP
+      - "993:993"   # IMAPS (Implicit TLS)
+      # Securely bind management port to localhost only
+      - "127.0.0.1:8080:8080"
+    environment:
+      - STALWART_RECOVERY_MODE=1
+      - STALWART_RECOVERY_ADMIN=admin:${ADMIN_PASSWORD}
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - ./data/stalwart:/var/lib/stalwart
+      - ./mail/stalwart:/etc/stalwart
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  jx-mail-panel:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: jx-mail-panel
+    restart: unless-stopped
+    ports:
+      - "${PANEL_PORT:-3003}:${PANEL_PORT:-3003}"
+    environment:
+      - PORT=${PANEL_PORT:-3003}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - MAIL_DOMAIN=${MAIL_DOMAIN}
+      - STALWART_API_URL=http://stalwart-mail:8080
+      - KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - TZ=${TZ:-America/Sao_Paulo}
+    depends_on:
+      stalwart-mail:
+        condition: service_healthy
+    volumes:
+      - ./data/stalwart:/var/lib/stalwart:ro # Read-only access to certs/logs if needed
+      - ./scripts:/opt/jx-mail/scripts
