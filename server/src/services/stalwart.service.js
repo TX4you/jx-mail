@@ -313,7 +313,7 @@ class StalwartService {
 
   // SYSTEM LOGS & STATUS
   async getSystemStatus() {
-    const isStalwartAlive = await fetch(`${STALWART_API_URL}/health`, { signal: AbortSignal.timeout(1000) })
+    const isStalwartAlive = await fetch(`${STALWART_API_URL}/healthz/live`, { signal: AbortSignal.timeout(1000) })
       .then(res => res.ok)
       .catch(() => false);
 
