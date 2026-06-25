@@ -4,6 +4,7 @@ services:
   stalwart-mail:
     image: stalwartlabs/stalwart:latest
     container_name: jx-mail-server
+    user: "root"
     restart: unless-stopped
     ports:
       - "25:25"     # SMTP (External Mail Receipt)
