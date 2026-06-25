@@ -186,7 +186,7 @@ class StalwartService {
   async createAccount(username, domain, password, quota = '1 GB') {
     // Attempt JMAP
     const quotaBytes = quota.includes('GB') ? parseInt(quota) * 1024 * 1024 * 1024 : 1024 * 1024 * 1024;
-    await this.callJMAP([
+    const response = await this.callJMAP([
       ['x:Account/set', {
         create: {
           new_user: {
@@ -194,12 +194,17 @@ class StalwartService {
             name: username,
             domainId: domain,
             credentials: [{ '@type': 'Password', secret: password }],
-            roles: ['User'],
+            roles: { '@type': 'User' },
+            permissions: { '@type': 'Inherit' },
             quotas: { maxDiskQuota: quotaBytes }
           }
         }
       }, 'c1']
     ]);
+
+    if (response) {
+      console.log('[Stalwart Service] Resposta da criação de conta:', JSON.stringify(response.methodResponses));
+    }
 
     // Update local DB
     const db = readLocalDb();
