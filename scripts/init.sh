@@ -22,10 +22,12 @@ export $(grep -v '^#' "$MAIL_DIR/.env" | xargs)
 # 2. Make scripts executable
 chmod +x "$DIR"/*.sh
 
-# 3. Create persistent directories
+# 3. Create persistent directories and set ownership to Stalwart user (1000:1000)
 mkdir -p "$MAIL_DIR/data/stalwart"
 mkdir -p "$MAIL_DIR/mail/stalwart"
 mkdir -p "$MAIL_DIR/mail/dkim"
+chown -R 1000:1000 "$MAIL_DIR/data/stalwart" "$MAIL_DIR/mail/stalwart" "$MAIL_DIR/mail/dkim"
+chmod -R 770 "$MAIL_DIR/data/stalwart" "$MAIL_DIR/mail/stalwart" "$MAIL_DIR/mail/dkim"
 
 # 4. Generate DKIM keys if not present
 SELECTOR="${DKIM_SELECTOR:-mail}"
