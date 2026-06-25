@@ -2,7 +2,7 @@
 FROM node:18-alpine AS frontend-builder
 WORKDIR /app/web
 COPY web/package*.json ./
-RUN npm ci
+RUN npm install
 COPY web/ ./
 RUN npm run build
 
@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 COPY server/package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 COPY server/ ./
 # Copy compiled web build to the public static directory in the server
 COPY --from=frontend-builder /app/web/dist ./src/public
