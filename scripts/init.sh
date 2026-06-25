@@ -45,7 +45,7 @@ echo "Waiting for Stalwart Mail Server to start..."
 MAX_ATTEMPTS=30
 ATTEMPT=1
 while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-    if curl -s http://localhost:8080/health &>/dev/null; then
+    if curl -s http://localhost:8080/healthz/live &>/dev/null; then
         echo "Stalwart Mail Server is up and running!"
         break
     fi

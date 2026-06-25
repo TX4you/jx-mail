@@ -20,12 +20,6 @@ services:
     volumes:
       - ./data/stalwart:/var/lib/stalwart
       - ./mail/stalwart:/etc/stalwart
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
   jx-mail-panel:
     build:
@@ -46,8 +40,7 @@ services:
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - TZ=${TZ:-America/Sao_Paulo}
     depends_on:
-      stalwart-mail:
-        condition: service_healthy
+      - stalwart-mail
     volumes:
       - ./data/stalwart:/var/lib/stalwart:ro # Read-only access to certs/logs if needed
       - ./scripts:/opt/jx-mail/scripts
